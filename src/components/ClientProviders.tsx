@@ -9,23 +9,23 @@ function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
 
   const clerkVars = theme === 'dark'
     ? {
-        colorPrimary: '#7c6dfa',
-        colorBackground: '#16161f',
-        colorText: '#f0effe',
-        colorTextSecondary: '#9b99b8',
-        colorInputBackground: '#1a1a25',
-        colorInputText: '#f0effe',
-        borderRadius: '10px',
+        colorPrimary: '#c4b5fd',
+        colorBackground: '#121217',
+        colorText: '#f8fafc',
+        colorTextSecondary: '#a1a1aa',
+        colorInputBackground: '#1a1a24',
+        colorInputText: '#f8fafc',
+        borderRadius: '12px',
         fontFamily: "'Inter', sans-serif",
       }
     : {
-        colorPrimary: '#7c5ce7',
-        colorBackground: '#f8f5f0',
-        colorText: '#2e2a33',
-        colorTextSecondary: '#635c6a',
-        colorInputBackground: '#ece6ef',
-        colorInputText: '#2e2a33',
-        borderRadius: '10px',
+        colorPrimary: '#8b5cf6',
+        colorBackground: '#ffffff',
+        colorText: '#111827',
+        colorTextSecondary: '#4b5563',
+        colorInputBackground: '#f9fafb',
+        colorInputText: '#111827',
+        borderRadius: '12px',
         fontFamily: "'Inter', sans-serif",
       };
 

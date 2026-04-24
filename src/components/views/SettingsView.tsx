@@ -16,7 +16,7 @@ export default function SettingsView() {
   const maxTokens = parseInt(settings.maxTokens) || 1400;
 
   return (
-    <div style={{ maxWidth: 720 }}>
+    <div style={{ maxWidth: 1200, width: '100%' }}>
       <SettingsSection title="Bridge Configuration" subtitle="FastAPI local server settings">
         <SettingsRow label="Port" desc="Both extensions hardcode this — change requires extension rebuild">
           <input

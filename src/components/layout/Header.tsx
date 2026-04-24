@@ -2,95 +2,103 @@
 
 import { UserButton } from '@clerk/nextjs';
 import { useTheme } from '@/components/ThemeProvider';
+import { useSettings } from '@/components/SettingsProvider';
 import { ViewType } from '@/app/page';
 
 interface HeaderProps {
   activeView: ViewType;
-  onMenuToggle: () => void;
+  setActiveView: (v: ViewType) => void;
 }
 
-const viewMeta: Record<ViewType, { title: string; sub: string }> = {
-  dashboard: { title: 'Dashboard', sub: 'Live context overview' },
-  sessions: { title: 'Sessions', sub: 'Saved context snapshots' },
-  priming: { title: 'Priming Prompt', sub: 'LLM handoff output' },
-  settings: { title: 'Settings', sub: 'Extensions & pipeline config' },
-};
+const navItems: { id: ViewType; label: string; }[] = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'sessions', label: 'Sessions' },
+  { id: 'priming', label: 'Priming Prompt' },
+  { id: 'settings', label: 'Settings' },
+];
 
-export default function Header({ activeView, onMenuToggle }: HeaderProps) {
-  const meta = viewMeta[activeView];
+export default function Header({ activeView, setActiveView }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const { settings } = useSettings();
 
   return (
-    <header className="header">
-      <button className="header-menu-btn" onClick={onMenuToggle} aria-label="Toggle sidebar">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <line x1="1" y1="3" x2="13" y2="3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="1" y1="11" x2="13" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </button>
+    <header className="top-nav">
+      {/* ── Left: Logo & Nav Links ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+        <div className="nav-logo">
+          <div className="logo-icon-small">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2" />
+              <polyline points="2 17 12 22 22 17" />
+              <polyline points="2 12 12 17 22 12" />
+            </svg>
+          </div>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, letterSpacing: '-0.04em', fontSize: 18, marginRight: 8 }}>ContextMind</span>
+        </div>
 
-      <span className="header-title">{meta.title}</span>
-      <span className="header-sub">/ {meta.sub}</span>
+        <div className="nav-links">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-pill ${activeView === item.id ? 'active' : ''}`}
+              onClick={() => setActiveView(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <div className="header-spacer" />
+      {/* ── Right: Extensions & CTA ── */}
+      <div className="nav-actions">
+        <div className="ext-chips">
+          <ExtChip label="VS Code" active />
+          <ExtChip label="Chrome" active />
+          <ExtChip label="FastAPI" active port={settings.port} />
+        </div>
+        
+        <div className="divider" />
 
-      <div className="header-actions">
         <button
           className="theme-toggle"
           onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          aria-label="Toggle theme"
         >
           {theme === 'dark' ? (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.3" />
-              <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           ) : (
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M14 9.5A6.5 6.5 0 0 1 6.5 2c0-.5.06-1 .17-1.47A7 7 0 1 0 14.47 8.83c-.47.11-.97.17-1.47.17h1Z"
-                stroke="currentColor"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
           )}
         </button>
-        <button className="btn btn-secondary">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.2" />
-            <line x1="6" y1="3.5" x2="6" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-            <circle cx="6" cy="7.5" r="0.5" fill="currentColor" />
-          </svg>
-          Docs
-        </button>
-        <button className="btn btn-primary">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          Save Context
-        </button>
-        <div className="header-user">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'clerk-avatar',
-                userButtonTrigger: 'clerk-user-trigger',
-              },
-            }}
-          />
-        </div>
+
+        <UserButton
+          appearance={{
+            elements: { avatarBox: 'clerk-avatar-small' },
+          }}
+        />
       </div>
     </header>
+  );
+}
+
+function ExtChip({ label, active, port }: { label: string; active: boolean; port?: string }) {
+  return (
+    <div className="ext-chip">
+      <div className={`ext-dot ${active ? 'active' : ''}`} />
+      <span>{label}</span>
+      {port && <span style={{ opacity: 0.5, marginLeft: 2 }}>:{port}</span>}
+    </div>
   );
 }

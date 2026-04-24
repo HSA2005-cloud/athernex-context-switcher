@@ -137,8 +137,8 @@ export default function PrimingPromptView() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {/* Sections navigator */}
         <div className="card">
-          <div className="card-title" style={{ marginBottom: 12, fontSize: 12 }}>Sections</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="card-title" style={{ marginBottom: 16, fontSize: 15 }}>Sections</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {SECTIONS.map((s) => (
               <button
                 key={s.label}
@@ -146,51 +146,44 @@ export default function PrimingPromptView() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '7px 10px',
+                  gap: 10,
+                  padding: '8px 12px',
                   border: `1px solid ${activeSection === s.label ? s.color + '40' : 'transparent'}`,
                   borderRadius: 'var(--radius-sm)',
                   background: activeSection === s.label ? s.color + '10' : 'transparent',
                   cursor: 'pointer',
                   color: activeSection === s.label ? s.color : 'var(--text-secondary)',
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: 500,
                   textAlign: 'left',
                   transition: 'all 0.15s',
                 }}
               >
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
                 {s.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Layer breakdown */}
-        <div className="card">
-          <div className="card-title" style={{ marginBottom: 12, fontSize: 12 }}>Context layers</div>
-          {[
-            { l: 'L1 Ground truth', t: 287, c: 'var(--accent)' },
-            { l: 'L3 Constraints', t: 98, c: '#f5844c' },
-            { l: 'L4 Recent', t: 340, c: '#f5a623' },
-            { l: 'L2 State', t: 210, c: '#3ecfb2' },
-            { l: 'L5 History', t: 130, c: 'var(--text-muted)' },
-          ].map((item) => (
-            <div key={item.l} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: item.c, flexShrink: 0 }} />
-              <span style={{ fontSize: 11, color: 'var(--text-secondary)', flex: 1 }}>{item.l}</span>
-              <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{item.t}t</span>
-            </div>
-          ))}
-        </div>
+
 
         {/* Actions */}
         <div className="card card-sm">
-          <div className="card-title" style={{ marginBottom: 10, fontSize: 12 }}>Open in</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {['Claude.ai', 'ChatGPT', 'Gemini'].map((p) => (
-              <button key={p} className="btn btn-secondary" style={{ justifyContent: 'flex-start', fontSize: 11 }}>
-                → {p}
+          <div className="card-title" style={{ marginBottom: 14, fontSize: 15 }}>Open in</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { name: 'Claude.ai', url: 'https://claude.ai/new' },
+              { name: 'ChatGPT', url: 'https://chatgpt.com/' },
+              { name: 'Gemini', url: 'https://gemini.google.com/' }
+            ].map((p) => (
+              <button
+                key={p.name}
+                className="btn btn-secondary"
+                style={{ justifyContent: 'flex-start', fontSize: 13, padding: '8px 14px' }}
+                onClick={() => window.open(p.url, '_blank')}
+              >
+                → {p.name}
               </button>
             ))}
           </div>

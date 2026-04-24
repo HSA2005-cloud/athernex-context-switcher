@@ -25,15 +25,10 @@ export default function Home() {
 
   return (
     <div className="app-shell">
-      <Sidebar
-        activeView={activeView}
-        setActiveView={setActiveView}
-        isOpen={sidebarOpen}
-      />
-      <div className={`main-area ${sidebarOpen ? 'sidebar-open' : ''}`}>
+      <div className="main-area">
         <Header
           activeView={activeView}
-          onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+          setActiveView={setActiveView}
         />
         {/* key forces remount on view change → re-triggers the entrance animation */}
         <main
