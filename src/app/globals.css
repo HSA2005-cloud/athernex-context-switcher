@@ -41,31 +41,31 @@
 
 /* ─── Light Mode Tokens ─── */
 [data-theme="light"] {
-  --bg-base: #f5f5f7;
-  --bg-surface: #ffffff;
-  --bg-elevated: #f0f0f4;
-  --bg-card: #ffffff;
-  --bg-hover: #eaeaf0;
+  --bg-base: #eeedf5;
+  --bg-surface: #f6f5fb;
+  --bg-elevated: #e8e7f0;
+  --bg-card: #f6f5fb;
+  --bg-hover: #dfdee8;
 
-  --border: rgba(0,0,0,0.08);
-  --border-mid: rgba(0,0,0,0.12);
-  --border-accent: rgba(0,0,0,0.20);
+  --border: rgba(100, 90, 140, 0.10);
+  --border-mid: rgba(100, 90, 140, 0.15);
+  --border-accent: rgba(100, 90, 140, 0.25);
 
-  --text-primary: #1a1a2e;
-  --text-secondary: #5c5b78;
-  --text-muted: #8e8da5;
+  --text-primary: #2d2b3d;
+  --text-secondary: #5e5c73;
+  --text-muted: #908ea6;
 
   --accent: #6c5ce7;
   --accent-glow: rgba(108, 92, 231, 0.15);
   --accent-dim: rgba(108, 92, 231, 0.06);
   --accent-2: #2db89a;
   --accent-3: #e06730;
-  --accent-warn: #e09a1e;
+  --accent-warn: #d99215;
   --accent-danger: #d4423c;
-  --accent-success: #22c55e;
+  --accent-success: #1ea854;
 
-  --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,0.08);
+  --shadow-card: 0 2px 10px rgba(80, 70, 120, 0.06);
+  --shadow-lg: 0 12px 40px rgba(80, 70, 120, 0.10);
 }
 
 /* ─── Reset ─── */
@@ -948,6 +948,39 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* ─── Auth Page Theme Toggle ─── */
+.auth-theme-toggle {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--border-mid);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+}
+
+.auth-theme-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: rotate(20deg) scale(1.05);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.auth-theme-toggle svg {
+  transition: transform 0.3s ease;
+}
+
 /* ─── Clerk Overrides ─── */
 .clerk-root {
   width: 100%;
@@ -960,6 +993,22 @@ body {
   box-shadow: var(--shadow-lg) !important;
 }
 
+/* Force ALL text inside Clerk to use theme colors */
+.clerk-card,
+.clerk-card *,
+.clerk-root,
+.clerk-root * {
+  color: var(--text-primary) !important;
+}
+
+.clerk-card p,
+.clerk-card span,
+.clerk-card div,
+.clerk-card a,
+.clerk-card label {
+  color: inherit !important;
+}
+
 .clerk-header-title {
   font-family: var(--font-display) !important;
   color: var(--text-primary) !important;
@@ -967,6 +1016,20 @@ body {
 
 .clerk-header-subtitle {
   color: var(--text-secondary) !important;
+}
+
+/* Footer text like "Don't have an account?" and "Secured by Clerk" */
+.clerk-card [class*="footer"],
+.clerk-card [class*="Footer"],
+.clerk-card [data-localization-key*="footer"],
+.clerk-card [class*="powered"],
+.clerk-card [class*="Powered"] {
+  color: var(--text-muted) !important;
+}
+
+.clerk-card [class*="footer"] *,
+.clerk-card [class*="Footer"] * {
+  color: var(--text-muted) !important;
 }
 
 .clerk-btn-primary {
@@ -978,12 +1041,18 @@ body {
   transition: all 0.15s !important;
 }
 
+.clerk-btn-primary *,
+.clerk-btn-primary span {
+  color: #fff !important;
+}
+
 .clerk-btn-primary:hover {
   filter: brightness(1.1) !important;
   box-shadow: 0 4px 16px var(--accent-glow) !important;
 }
 
-.clerk-footer-link {
+.clerk-footer-link,
+.clerk-card a[href] {
   color: var(--accent) !important;
 }
 
@@ -1013,9 +1082,19 @@ body {
   transition: all 0.15s !important;
 }
 
+.clerk-social-btn *,
+.clerk-social-btn span {
+  color: var(--text-secondary) !important;
+}
+
 .clerk-social-btn:hover {
   background: var(--bg-hover) !important;
   border-color: var(--border-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+.clerk-social-btn:hover *,
+.clerk-social-btn:hover span {
   color: var(--text-primary) !important;
 }
 
@@ -1078,4 +1157,76 @@ body {
 
 .theme-toggle svg {
   transition: transform 0.3s ease;
+}
+
+/* ─── Global Clerk Overrides (all Clerk-injected components) ─── */
+/* Clerk injects elements with class names like cl-*, so we target all of them */
+[class*="cl-"] {
+  color: var(--text-primary);
+}
+
+[class*="cl-userButtonPopover"],
+[class*="cl-userButtonPopover"] *,
+[class*="cl-popoverCard"],
+[class*="cl-popoverCard"] * {
+  color: var(--text-primary) !important;
+}
+
+[class*="cl-userButton"] [class*="text"],
+[class*="cl-userButton"] span,
+[class*="cl-userButton"] p,
+[class*="cl-userButton"] div {
+  color: var(--text-primary) !important;
+}
+
+[class*="cl-menuItem"],
+[class*="cl-menuItem"] * {
+  color: var(--text-primary) !important;
+}
+
+[class*="cl-menuItem"]:hover {
+  background: var(--bg-hover) !important;
+}
+
+[class*="cl-userPreview"] *,
+[class*="cl-avatarBox"] + * {
+  color: var(--text-primary) !important;
+}
+
+/* Clerk internal card backgrounds */
+[class*="cl-card"],
+[class*="cl-modalContent"] {
+  background: var(--bg-surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* Clerk popover/dropdown backgrounds */
+[class*="cl-popoverCard"] {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Clerk internal footer / powered-by */
+[class*="cl-footer"] *,
+[class*="cl-internal"],
+[class*="cl-internal"] * {
+  color: var(--text-muted) !important;
+}
+
+/* Clerk action buttons inside popovers */
+[class*="cl-menuButton"],
+[class*="cl-actionButton"] {
+  color: var(--text-secondary) !important;
+}
+
+[class*="cl-menuButton"]:hover,
+[class*="cl-actionButton"]:hover {
+  color: var(--text-primary) !important;
+  background: var(--bg-hover) !important;
+}
+
+/* Ensure Clerk modals also use theme colors */
+[class*="cl-modalBackdrop"] {
+  background: rgba(0, 0, 0, 0.6) !important;
 }
