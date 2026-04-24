@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSettings } from '@/components/SettingsProvider';
 
 const PRIMING_PROMPT = `# Project context handoff
 
@@ -58,6 +59,8 @@ const SECTIONS = [
 export default function PrimingPromptView() {
   const [copied, setCopied] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const { settings } = useSettings();
+  const maxTokens = parseInt(settings.maxTokens) || 1400;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(PRIMING_PROMPT);
@@ -75,7 +78,7 @@ export default function PrimingPromptView() {
           <div className="card-header" style={{ marginBottom: 20 }}>
             <div>
               <div className="card-title">LLM Priming Prompt</div>
-              <div className="card-subtitle">Session #24 · feat/auth-refresh · {tokenCount} tokens</div>
+              <div className="card-subtitle">Session #24 · feat/auth-refresh · {tokenCount} / {maxTokens.toLocaleString()} tokens</div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="btn btn-secondary">
@@ -109,14 +112,14 @@ export default function PrimingPromptView() {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Token budget</span>
               <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
-                {tokenCount} / 1,400
+                {tokenCount} / {maxTokens.toLocaleString()}
               </span>
             </div>
             <div style={{ height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{
                 height: '100%',
-                width: `${Math.min((tokenCount / 1400) * 100, 100)}%`,
-                background: tokenCount > 1300 ? 'var(--accent-warn)' : 'var(--accent)',
+                width: `${Math.min((tokenCount / maxTokens) * 100, 100)}%`,
+                background: tokenCount > maxTokens * 0.9 ? 'var(--accent-warn)' : 'var(--accent)',
                 borderRadius: 2,
                 transition: 'width 0.5s ease',
               }} />

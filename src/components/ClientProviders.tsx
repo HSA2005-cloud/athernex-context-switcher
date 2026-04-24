@@ -41,13 +41,16 @@ function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
     </ClerkProvider>
   );
 }
+import { SettingsProvider } from '@/components/SettingsProvider';
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <ClerkThemeWrapper>
-        {children}
-      </ClerkThemeWrapper>
+      <SettingsProvider>
+        <ClerkThemeWrapper>
+          {children}
+        </ClerkThemeWrapper>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

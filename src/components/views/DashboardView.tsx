@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSettings } from '@/components/SettingsProvider';
 
 const PIPELINE_STEPS = [
   { id: 1, name: 'Layer 1 reader', tool: 'fs reader', desc: 'package.json, schema, routes, .env', status: 'done' },
@@ -10,7 +11,7 @@ const PIPELINE_STEPS = [
   { id: 5, name: 'TextRank scoring', tool: 'TextRank', desc: 'Word overlap graph · drops below-threshold', status: 'running' },
   { id: 6, name: 'SVM novelty filter', tool: 'SVM', desc: 'Cosine similarity > 0.85 → skip', status: 'pending' },
   { id: 7, name: 'Contradiction check', tool: 'custom', desc: 'Entity match + antonym lookup + decay', status: 'pending' },
-  { id: 8, name: 'Context builder', tool: 'assembler', desc: 'L1+L3+L4+L2+L5 — stops at 1400 tokens', status: 'pending' },
+  { id: 8, name: 'Context builder', tool: 'assembler', desc: 'L1+L3+L4+L2+L5 — stops at budget', status: 'pending' },
 ];
 
 const MEMORY_LAYERS = [
@@ -53,6 +54,9 @@ const RECENT_SESSIONS = [
 
 export default function DashboardView() {
   const [activeTab, setActiveTab] = useState<'pipeline' | 'layers'>('pipeline');
+  const { settings } = useSettings();
+  const maxTokens = parseInt(settings.maxTokens) || 1400;
+  const totalUsed = MEMORY_LAYERS.reduce((sum, l) => sum + l.used, 0);
 
   return (
     <div>
@@ -60,7 +64,7 @@ export default function DashboardView() {
       <div className="stat-grid">
         <StatCard label="Sessions saved" value="24" change="+3 today" up accentColor="var(--accent)" />
         <StatCard label="Context saved" value="23m" change="per session avg" up accentColor="#3ecfb2" />
-        <StatCard label="Token budget" value="1,382" change="of 1,400 used" down accentColor="#f5844c" />
+        <StatCard label="Token budget" value={`${totalUsed.toLocaleString()}`} change={`of ${maxTokens.toLocaleString()} used`} down={totalUsed > maxTokens * 0.9} up={totalUsed <= maxTokens * 0.9} accentColor="#f5844c" />
         <StatCard label="Facts stored" value="412" change="+18 this session" up accentColor="#f5a623" />
       </div>
 
@@ -168,13 +172,13 @@ export default function DashboardView() {
             label="VS Code"
             icon="⌨"
             items={['middleware.py — line 47', 'database.py', 'main.py']}
-            meta="feat/auth-refresh · 3 files open"
+            meta={`feat/auth-refresh · 3 files open`}
             color="var(--accent)"
           />
           <CaptureSource
             label="Chrome"
             icon="◉"
-            items={['claude.ai — active', 'localhost:3000', 'MongoDB Atlas']}
+            items={['claude.ai — active', `localhost:${settings.port}`, 'MongoDB Atlas']}
             meta="3 tabs selected · 2 AI tabs"
             color="#3ecfb2"
           />
@@ -184,15 +188,16 @@ export default function DashboardView() {
   );
 }
 
-function StatCard({ label, value, change, up, accentColor }: {
-  label: string; value: string; change: string; up: boolean; accentColor: string;
+function StatCard({ label, value, change, up, accentColor, down }: {
+  label: string; value: string; change: string; up: boolean; accentColor: string; down?: boolean;
 }) {
+  const isDown = down ?? !up;
   return (
     <div className="stat-card" style={{ '--accent-color': accentColor } as React.CSSProperties}>
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
-      <div className={`stat-change ${up ? 'up' : 'down'}`}>
-        <span>{up ? '↑' : '↓'}</span>
+      <div className={`stat-change ${up && !isDown ? 'up' : 'down'}`}>
+        <span>{up && !isDown ? '↑' : '↓'}</span>
         {change}
       </div>
     </div>

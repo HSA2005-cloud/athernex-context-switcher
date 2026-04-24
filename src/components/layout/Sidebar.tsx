@@ -1,6 +1,7 @@
 'use client';
 
 import { ViewType } from '@/app/page';
+import { useSettings } from '@/components/SettingsProvider';
 
 interface SidebarProps {
   activeView: ViewType;
@@ -21,6 +22,7 @@ const navItems: {
 ];
 
 export default function Sidebar({ activeView, setActiveView, isOpen }: SidebarProps) {
+  const { settings } = useSettings();
   if (!isOpen) return null;
 
   return (
@@ -58,9 +60,9 @@ export default function Sidebar({ activeView, setActiveView, isOpen }: SidebarPr
 
         <div className="nav-label" style={{ marginTop: 16 }}>Extensions</div>
         <div style={{ padding: '4px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <ExtBadge label="VS Code" status="connected" port="37218" />
+          <ExtBadge label="VS Code" status="connected" port={settings.port} />
           <ExtBadge label="Chrome" status="connected" port="" />
-          <ExtBadge label="FastAPI" status="running" port=":37218" />
+          <ExtBadge label="FastAPI" status="running" port={`:${settings.port}`} />
         </div>
       </nav>
 
@@ -68,7 +70,7 @@ export default function Sidebar({ activeView, setActiveView, isOpen }: SidebarPr
         <div className="status-chip">
           <div className="status-dot" />
           <span className="status-label">Bridge online</span>
-          <span className="status-port">:37218</span>
+          <span className="status-port">:{settings.port}</span>
         </div>
       </div>
     </aside>

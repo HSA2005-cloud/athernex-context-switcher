@@ -1,20 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useSettings } from '@/components/SettingsProvider';
 
 export default function SettingsView() {
-  const [port, setPort] = useState('37218');
-  const [sessionWindow, setSessionWindow] = useState('5');
-  const [maxTokens, setMaxTokens] = useState('1400');
-  const [noiseDomains, setNoiseDomains] = useState(
-    'youtube.com, netflix.com, twitter.com, reddit.com, instagram.com, twitch.tv, spotify.com, tiktok.com'
-  );
+  const { settings, updateSettings, saveSettings, hasUnsavedChanges } = useSettings();
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
+    saveSettings();
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
+
+  const maxTokens = parseInt(settings.maxTokens) || 1400;
 
   return (
     <div style={{ maxWidth: 720 }}>
@@ -22,16 +21,16 @@ export default function SettingsView() {
         <SettingsRow label="Port" desc="Both extensions hardcode this — change requires extension rebuild">
           <input
             type="text"
-            value={port}
-            onChange={(e) => setPort(e.target.value)}
+            value={settings.port}
+            onChange={(e) => updateSettings({ port: e.target.value })}
             style={inputStyle}
           />
         </SettingsRow>
         <SettingsRow label="Session window (min)" desc="Payloads sent within this window are merged into one session">
           <input
             type="number"
-            value={sessionWindow}
-            onChange={(e) => setSessionWindow(e.target.value)}
+            value={settings.sessionWindow}
+            onChange={(e) => updateSettings({ sessionWindow: e.target.value })}
             style={{ ...inputStyle, width: 80 }}
           />
         </SettingsRow>
@@ -45,12 +44,12 @@ export default function SettingsView() {
               min="800"
               max="2000"
               step="100"
-              value={maxTokens}
-              onChange={(e) => setMaxTokens(e.target.value)}
+              value={settings.maxTokens}
+              onChange={(e) => updateSettings({ maxTokens: e.target.value })}
               style={{ width: 160 }}
             />
             <span style={{ fontSize: 13, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', minWidth: 50 }}>
-              {parseInt(maxTokens).toLocaleString()}
+              {maxTokens.toLocaleString()}
             </span>
           </div>
         </SettingsRow>
@@ -70,7 +69,7 @@ export default function SettingsView() {
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{item.l}</span>
               <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>~{item.t}t</span>
               <div style={{ height: 3, background: 'var(--bg-hover)', borderRadius: 2 }}>
-                <div style={{ height: '100%', width: `${(item.t / parseInt(maxTokens)) * 100}%`, background: 'var(--accent)', borderRadius: 2 }} />
+                <div style={{ height: '100%', width: `${(item.t / maxTokens) * 100}%`, background: 'var(--accent)', borderRadius: 2 }} />
               </div>
             </div>
           ))}
@@ -80,8 +79,8 @@ export default function SettingsView() {
       <SettingsSection title="Chrome Extension" subtitle="Tab classification and filtering">
         <SettingsRow label="Noise domains" desc="These domains are unchecked by default in the tab picker">
           <textarea
-            value={noiseDomains}
-            onChange={(e) => setNoiseDomains(e.target.value)}
+            value={settings.noiseDomains}
+            onChange={(e) => updateSettings({ noiseDomains: e.target.value })}
             rows={3}
             style={{
               ...inputStyle,
@@ -110,15 +109,30 @@ export default function SettingsView() {
 
       <SettingsSection title="VS Code Extension" subtitle="Capture settings">
         <SettingsRow label="Max file lines captured" desc="First N lines of each open file sent to bridge">
-          <input type="number" defaultValue={200} style={{ ...inputStyle, width: 100 }} />
+          <input
+            type="number"
+            value={settings.maxFileLines}
+            onChange={(e) => updateSettings({ maxFileLines: e.target.value })}
+            style={{ ...inputStyle, width: 100 }}
+          />
         </SettingsRow>
         <SettingsRow label="Max git diff lines" desc="Lines of git diff HEAD included in payload">
-          <input type="number" defaultValue={100} style={{ ...inputStyle, width: 100 }} />
+          <input
+            type="number"
+            value={settings.maxGitDiffLines}
+            onChange={(e) => updateSettings({ maxGitDiffLines: e.target.value })}
+            style={{ ...inputStyle, width: 100 }}
+          />
         </SettingsRow>
       </SettingsSection>
 
       {/* Save button */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, paddingTop: 8 }}>
+        {hasUnsavedChanges && (
+          <span style={{ fontSize: 11, color: 'var(--accent-warn)', fontStyle: 'italic' }}>
+            Unsaved changes
+          </span>
+        )}
         <button
           className={`btn ${saved ? 'btn-success' : 'btn-primary'}`}
           onClick={handleSave}
