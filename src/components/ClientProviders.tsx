@@ -19,12 +19,12 @@ function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
         fontFamily: "'Inter', sans-serif",
       }
     : {
-        colorPrimary: '#6c5ce7',
-        colorBackground: '#f6f5fb',
-        colorText: '#2d2b3d',
-        colorTextSecondary: '#5e5c73',
-        colorInputBackground: '#e8e7f0',
-        colorInputText: '#2d2b3d',
+        colorPrimary: '#7c5ce7',
+        colorBackground: '#f8f5f0',
+        colorText: '#2e2a33',
+        colorTextSecondary: '#635c6a',
+        colorInputBackground: '#ece6ef',
+        colorInputText: '#2e2a33',
         borderRadius: '10px',
         fontFamily: "'Inter', sans-serif",
       };
