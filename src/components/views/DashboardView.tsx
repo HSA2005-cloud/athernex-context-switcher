@@ -3,26 +3,25 @@
 import { useState } from 'react';
 import { useSettings } from '@/components/SettingsProvider';
 
-const PIPELINE_STEPS = [
-  { id: 1, name: 'Layer 1 reader', tool: 'fs reader', desc: 'package.json, schema, routes, .env', status: 'done' },
-  { id: 2, name: 'Conversation compressor', tool: 'TextRank', desc: 'User turns capped 500ch · assistant top-3', status: 'done' },
-  { id: 3, name: 'spaCy NER', tool: 'spaCy v3', desc: 'Entities: names, tech, branches, services', status: 'done' },
-  { id: 4, name: 'YAKE keyphrases', tool: 'YAKE', desc: 'Offline keyphrase extraction — no LLM', status: 'done' },
-  { id: 5, name: 'TextRank scoring', tool: 'TextRank', desc: 'Word overlap graph · drops below-threshold', status: 'running' },
-  { id: 6, name: 'SVM novelty filter', tool: 'SVM', desc: 'Cosine similarity > 0.85 → skip', status: 'pending' },
-  { id: 7, name: 'Contradiction check', tool: 'custom', desc: 'Entity match + antonym lookup + decay', status: 'pending' },
-  { id: 8, name: 'Context builder', tool: 'assembler', desc: 'L1+L3+L4+L2+L5 — stops at budget', status: 'pending' },
-];
+const PLATFORM_COLORS: Record<string, string> = {
+  'claude.ai': '#2563eb',
+  'chatgpt': '#10b981',
+  'gemini': '#8b5cf6',
+};
 
-const MEMORY_LAYERS = [
-  { num: 'L1', name: 'Ground truth', desc: 'From actual files', budget: 300, used: 287, color: '#7c6dfa' },
-  { num: 'L2', name: 'Current state', desc: 'Working / broken', budget: 300, used: 210, color: '#3ecfb2' },
-  { num: 'L3', name: 'Hard constraints', desc: 'Never / always rules', budget: 150, used: 98, color: '#f5844c' },
-  { num: 'L4', name: 'Recent context', desc: 'Last 48hr activity', budget: 400, used: 340, color: '#f5a623' },
-  { num: 'L5', name: 'Historical', desc: 'FAISS vector search', budget: 250, used: 130, color: '#9b99b8' },
-];
+interface Session {
+  id: string;
+  title: string;
+  file: string;
+  branch: string;
+  time: string;
+  tags: string[];
+  platform: string;
+  active?: boolean;
+  summary: string;
+}
 
-const RECENT_SESSIONS = [
+const ALL_SESSIONS: Session[] = [
   {
     id: 's1',
     title: 'JWT refresh token middleware',
@@ -30,7 +29,9 @@ const RECENT_SESSIONS = [
     branch: 'feat/auth-refresh',
     time: '14 min ago',
     tags: ['FastAPI', 'Python', 'Auth'],
+    platform: 'claude.ai',
     active: true,
+    summary: 'Token validation done — working on expiry handling and 401 response headers.',
   },
   {
     id: 's2',
@@ -39,7 +40,8 @@ const RECENT_SESSIONS = [
     branch: 'main',
     time: '2 hr ago',
     tags: ['MongoDB', 'Python'],
-    active: false,
+    platform: 'chatgpt',
+    summary: 'Atlas pool settings tuned. Connection limits under load still under investigation.',
   },
   {
     id: 's3',
@@ -48,195 +50,139 @@ const RECENT_SESSIONS = [
     branch: 'feat/chrome-ext',
     time: '5 hr ago',
     tags: ['JS', 'Chrome', 'DOM'],
-    active: false,
+    platform: 'gemini',
+    summary: 'Platform selectors for Claude + ChatGPT complete. TextRank compression working.',
   },
 ];
 
+const AI_SUMMARY = {
+  focus: {
+    title: 'Current Focus',
+    detail: 'Building the expiry check logic in middleware.py at line 47. Token validation is complete.',
+  },
+  inProgress: [
+    'JWT token expiry check — comparing exp claim to now()',
+    'Chrome extension Gemini DOM selector',
+  ],
+  issues: [
+    'FAISS novelty filter throws KeyError on empty index',
+    'MongoDB pool exhaustion under load',
+  ],
+  nextSteps: [
+    'Handle expiry → raise 401 with WWW-Authenticate',
+    'Wire refresh endpoint POST /auth/refresh',
+  ],
+};
+
 export default function DashboardView() {
-  const [activeTab, setActiveTab] = useState<'pipeline' | 'layers'>('pipeline');
   const { settings } = useSettings();
   const maxTokens = parseInt(settings.maxTokens) || 1400;
-  const totalUsed = MEMORY_LAYERS.reduce((sum, l) => sum + l.used, 0);
+  const [showAll, setShowAll] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<Session>(ALL_SESSIONS[0]);
+  const totalUsed = 1065;
+  const pct = Math.round((totalUsed / maxTokens) * 100);
 
   return (
-    <div>
-      {/* Stats */}
-      <div className="stat-grid">
-        <StatCard label="Sessions saved" value="24" change="+3 today" up accentColor="var(--accent)" />
-        <StatCard label="Context saved" value="23m" change="per session avg" up accentColor="#3ecfb2" />
-        <StatCard label="Token budget" value={`${totalUsed.toLocaleString()}`} change={`of ${maxTokens.toLocaleString()} used`} down={totalUsed > maxTokens * 0.9} up={totalUsed <= maxTokens * 0.9} accentColor="#f5844c" />
-        <StatCard label="Facts stored" value="412" change="+18 this session" up accentColor="#f5a623" />
-      </div>
-
-      <div className="grid-2" style={{ gap: 20, marginBottom: 24 }}>
-        {/* ML Pipeline */}
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <div className="card-title">
-                <span style={{ color: 'var(--accent)', fontSize: 14 }}>⟳</span>
-                ML Pipeline
-              </div>
-              <div className="card-subtitle">Processing session #24</div>
-            </div>
-            <div className="tabs">
-              <button className={`tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`} onClick={() => setActiveTab('pipeline')}>Steps</button>
-              <button className={`tab-btn ${activeTab === 'layers' ? 'active' : ''}`} onClick={() => setActiveTab('layers')}>Memory</button>
-            </div>
-          </div>
-
-          {activeTab === 'pipeline' ? (
-            <div className="pipeline">
-              {PIPELINE_STEPS.map((step) => (
-                <div key={step.id} className={`pipeline-step ${step.status}`}>
-                  <span className="step-num">#{step.id}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="step-name">{step.name}</div>
-                    <div className="step-desc">{step.desc}</div>
-                  </div>
-                  <span className={`tag tag-${step.status === 'done' ? 'green' : step.status === 'running' ? 'purple' : 'gray'}`} style={{ fontSize: 9 }}>
-                    {step.tool}
-                  </span>
-                  <div className={`step-status ${step.status}`}>
-                    {step.status === 'done' && '✓'}
-                    {step.status === 'running' && <span className="pulse">●</span>}
-                    {step.status === 'pending' && '○'}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="layer-grid">
-              {MEMORY_LAYERS.map((layer) => (
-                <div key={layer.num} className="layer-item">
-                  <div className="layer-num" style={{ color: layer.color }}>{layer.num}</div>
-                  <div className="layer-name">{layer.name}</div>
-                  <div className="layer-budget">{layer.used} / {layer.budget} tokens</div>
-                  <div className="layer-bar">
-                    <div
-                      className="layer-fill"
-                      style={{
-                        width: `${(layer.used / layer.budget) * 100}%`,
-                        background: layer.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Recent Sessions */}
-        <div className="card">
-          <div className="card-header">
-            <div>
-              <div className="card-title">Recent Sessions</div>
-              <div className="card-subtitle">Last 3 context snapshots</div>
-            </div>
-            <button className="btn btn-ghost" style={{ fontSize: 11 }}>View all</button>
-          </div>
-          <div className="session-list">
-            {RECENT_SESSIONS.map((s) => (
-              <div key={s.id} className={`session-card ${s.active ? 'active-session' : ''}`}>
-                <div className="session-meta">
-                  <span className="session-time">{s.time}</span>
-                  {s.active && <span className="tag tag-purple" style={{ fontSize: 9 }}>active</span>}
-                </div>
-                <div className="session-title">{s.title}</div>
-                <div className="session-desc" style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  📄 {s.file} &nbsp;·&nbsp; ⑂ {s.branch}
-                </div>
-                <div className="session-tags">
-                  {s.tags.map((t) => (
-                    <span key={t} className="tag tag-gray">{t}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Live capture status */}
-      <div className="card">
-        <div className="card-header">
-          <div className="card-title">
-            <span className="pulse" style={{ color: 'var(--accent-success)', fontSize: 10 }}>●</span>
-            Live Capture Status
-          </div>
-          <span className="tag tag-green">Both extensions active</span>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <CaptureSource
-            label="VS Code"
-            icon="⌨"
-            items={['middleware.py — line 47', 'database.py', 'main.py']}
-            meta={`feat/auth-refresh · 3 files open`}
-            color="var(--accent)"
-          />
-          <CaptureSource
-            label="Chrome"
-            icon="◉"
-            items={['claude.ai — active', `localhost:${settings.port}`, 'MongoDB Atlas']}
-            meta="3 tabs selected · 2 AI tabs"
-            color="#3ecfb2"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value, change, up, accentColor, down }: {
-  label: string; value: string; change: string; up: boolean; accentColor: string; down?: boolean;
-}) {
-  const isDown = down ?? !up;
-  return (
-    <div className="stat-card" style={{ '--accent-color': accentColor } as React.CSSProperties}>
-      <div className="stat-label">{label}</div>
-      <div className="stat-value">{value}</div>
-      <div className={`stat-change ${up && !isDown ? 'up' : 'down'}`}>
-        <span>{up && !isDown ? '↑' : '↓'}</span>
-        {change}
-      </div>
-    </div>
-  );
-}
-
-function CaptureSource({ label, icon, items, meta, color }: {
-  label: string; icon: string; items: string[]; meta: string; color: string;
-}) {
-  return (
-    <div style={{
-      background: 'var(--bg-elevated)',
-      border: '1px solid var(--border)',
-      borderRadius: 'var(--radius)',
-      padding: 14,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+      
+      {/* ── Main Hero Area ── */}
+      <div style={{ textAlign: 'center', marginBottom: 64, marginTop: 24 }}>
         <div style={{
-          width: 26, height: 26, background: `${color}18`, borderRadius: 6,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 13, color,
-        }}>{icon}</div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{label}</span>
-        <div className="status-dot" style={{ marginLeft: 'auto' }} />
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: 'var(--bg-hover)', padding: '6px 16px',
+          borderRadius: 30, fontSize: 13, fontWeight: 600,
+          color: 'var(--accent)', marginBottom: 24
+        }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />
+          Context System Active
+        </div>
+        <h1 className="h1">The new way<br/>developers keep context.</h1>
+        <p className="subtitle" style={{ margin: '0 auto' }}>
+          Your active coding sessions, architecture decisions, and LLM conversations
+          sync perfectly across all environments.
+        </p>
+        <div style={{ marginTop: 32, display: 'flex', gap: 16, justifyContent: 'center' }}>
+          <button className="btn btn-primary">Save Context Now</button>
+          <button className="btn btn-secondary">View Documentation</button>
+        </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {items.map((item, i) => (
-          <div key={i} style={{
-            fontSize: 11,
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-secondary)',
-            padding: '3px 8px',
-            background: 'var(--bg-base)',
-            borderRadius: 4,
-            border: '1px solid var(--border)',
-          }}>{item}</div>
-        ))}
+
+      {/* ── Stats ── */}
+      <div className="stat-grid">
+        <div className="stat-card">
+          <div className="stat-label">Sessions</div>
+          <div className="stat-value">24</div>
+          <div className="stat-change up">↑ +3 today</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Context Saved</div>
+          <div className="stat-value">23m</div>
+          <div className="stat-change up">↑ per session avg</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Token Budget</div>
+          <div className="stat-value">{pct}%</div>
+          <div className="stat-change down">{totalUsed.toLocaleString()} of {maxTokens.toLocaleString()}</div>
+        </div>
       </div>
-      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 8 }}>{meta}</div>
+
+      {/* ── AI Summary Boxes ── */}
+      <div style={{ marginBottom: 48 }}>
+        <h2 className="h2" style={{ textAlign: 'center', marginBottom: 32 }}>AI Context Summary</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          
+          <div className="box-blue">
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Current Focus</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              {AI_SUMMARY.focus.detail}
+            </p>
+          </div>
+
+          <div className="box-pink">
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>In Progress</h3>
+            <ul style={{ paddingLeft: 16, color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
+              {AI_SUMMARY.inProgress.map((item, i) => <li key={i} style={{ marginBottom: 8 }}>{item}</li>)}
+            </ul>
+          </div>
+
+          <div className="box-purple">
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>Next Steps</h3>
+            <ul style={{ paddingLeft: 16, color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6 }}>
+              {AI_SUMMARY.nextSteps.map((item, i) => <li key={i} style={{ marginBottom: 8 }}>{item}</li>)}
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── Recent Sessions ── */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
+          <div>
+            <h2 className="h2" style={{ marginBottom: 4 }}>Recent Sessions</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>Pick up exactly where you left off.</p>
+          </div>
+          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: 13 }}>View all history</button>
+        </div>
+
+        <div className="session-list">
+          {ALL_SESSIONS.map((s) => (
+            <div key={s.id} className={`session-card ${s.id === selectedSession.id ? 'active-session' : ''}`} onClick={() => setSelectedSession(s)}>
+              <div className="session-meta">
+                <span style={{ fontWeight: 600, color: PLATFORM_COLORS[s.platform] || 'var(--accent)' }}>{s.platform}</span>
+                <span>•</span>
+                <span>{s.time}</span>
+              </div>
+              <div className="session-title">{s.title}</div>
+              <div className="session-desc">{s.summary}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                {s.tags.map(t => <span key={t} className="tag">{t}</span>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }

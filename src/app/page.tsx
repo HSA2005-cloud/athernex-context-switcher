@@ -35,7 +35,12 @@ export default function Home() {
           activeView={activeView}
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
         />
-        <main className="main-content">
+        {/* key forces remount on view change → re-triggers the entrance animation */}
+        <main
+          className="main-content"
+          key={activeView}
+          style={{ animation: 'slideUpFade 0.4s cubic-bezier(0.22, 1, 0.36, 1) both' }}
+        >
           {renderView()}
         </main>
       </div>
