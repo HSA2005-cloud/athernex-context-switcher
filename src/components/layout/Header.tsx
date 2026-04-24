@@ -1,5 +1,6 @@
 'use client';
 
+import { UserButton } from '@clerk/nextjs';
 import { ViewType } from '@/app/page';
 
 interface HeaderProps {
@@ -47,6 +48,16 @@ export default function Header({ activeView, onMenuToggle }: HeaderProps) {
           </svg>
           Save Context
         </button>
+        <div className="header-user">
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: 'clerk-avatar',
+                userButtonTrigger: 'clerk-user-trigger',
+              },
+            }}
+          />
+        </div>
       </div>
     </header>
   );
