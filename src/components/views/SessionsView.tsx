@@ -79,11 +79,10 @@ const PLATFORM_COLORS: Record<string, string> = {
 
 export default function SessionsView() {
   const [selected, setSelected] = useState<Session>(SESSIONS[0]);
-  const [filter, setFilter] = useState<'all' | 'today' | 'claude.ai'>('all');
+  const [filter, setFilter] = useState<'all' | 'today'>('all');
 
   const filtered = SESSIONS.filter((s) => {
     if (filter === 'today') return s.time.includes('min') || s.time.includes('hr');
-    if (filter === 'claude.ai') return s.platform === 'claude.ai';
     return true;
   });
 
@@ -91,11 +90,11 @@ export default function SessionsView() {
     <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20, minHeight: 'calc(100vh - 120px)' }}>
       {/* Session list panel */}
       <div>
-        <div className="section-header" style={{ marginBottom: 12 }}>
+        <div className="section-header" style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="tabs">
-            {(['all', 'today', 'claude.ai'] as const).map((f) => (
+            {(['all', 'today'] as const).map((f) => (
               <button key={f} className={`tab-btn ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
-                {f === 'all' ? 'All' : f === 'today' ? 'Today' : 'Claude.ai'}
+                {f === 'all' ? 'All' : 'Today'}
               </button>
             ))}
           </div>
