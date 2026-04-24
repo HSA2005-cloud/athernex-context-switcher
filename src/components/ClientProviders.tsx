@@ -20,11 +20,11 @@ function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
       }
     : {
         colorPrimary: '#6c5ce7',
-        colorBackground: '#ffffff',
-        colorText: '#1a1a2e',
-        colorTextSecondary: '#5c5b78',
-        colorInputBackground: '#f0f0f4',
-        colorInputText: '#1a1a2e',
+        colorBackground: '#f6f5fb',
+        colorText: '#2d2b3d',
+        colorTextSecondary: '#5e5c73',
+        colorInputBackground: '#e8e7f0',
+        colorInputText: '#2d2b3d',
         borderRadius: '10px',
         fontFamily: "'Inter', sans-serif",
       };
