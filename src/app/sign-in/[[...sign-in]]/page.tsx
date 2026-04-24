@@ -30,16 +30,6 @@ export default function SignInPage() {
               dividerText: 'clerk-divider-text',
               socialButtonsBlockButton: 'clerk-social-btn',
             },
-            variables: {
-              colorPrimary: '#7c6dfa',
-              colorBackground: '#16161f',
-              colorText: '#f0effe',
-              colorTextSecondary: '#9b99b8',
-              colorInputBackground: '#1a1a25',
-              colorInputText: '#f0effe',
-              borderRadius: '10px',
-              fontFamily: "'Inter', sans-serif",
-            },
           }}
         />
       </div>

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 
-/* ─── Design Tokens ─── */
+/* ─── Design Tokens (Dark — default) ─── */
 :root {
   --bg-base: #0a0a0f;
   --bg-surface: #111118;
@@ -34,11 +34,44 @@
   --font-display: 'Syne', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 16px 64px rgba(0,0,0,0.4);
+}
+
+/* ─── Light Mode Tokens ─── */
+[data-theme="light"] {
+  --bg-base: #f5f5f7;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f0f0f4;
+  --bg-card: #ffffff;
+  --bg-hover: #eaeaf0;
+
+  --border: rgba(0,0,0,0.08);
+  --border-mid: rgba(0,0,0,0.12);
+  --border-accent: rgba(0,0,0,0.20);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #5c5b78;
+  --text-muted: #8e8da5;
+
+  --accent: #6c5ce7;
+  --accent-glow: rgba(108, 92, 231, 0.15);
+  --accent-dim: rgba(108, 92, 231, 0.06);
+  --accent-2: #2db89a;
+  --accent-3: #e06730;
+  --accent-warn: #e09a1e;
+  --accent-danger: #d4423c;
+  --accent-success: #22c55e;
+
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.08);
 }
 
 /* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 14px; }
+html, body { transition: background-color 0.3s ease, color 0.3s ease; }
 body {
   font-family: var(--font-body);
   background: var(--bg-base);
@@ -857,7 +890,7 @@ body {
   left: -20%;
   width: 60%;
   height: 80%;
-  background: radial-gradient(ellipse, rgba(124, 109, 250, 0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -898,7 +931,7 @@ body {
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  box-shadow: 0 8px 32px rgba(124, 109, 250, 0.3);
+  box-shadow: 0 8px 32px var(--accent-glow);
 }
 
 .auth-title {
@@ -924,7 +957,7 @@ body {
   background: var(--bg-surface) !important;
   border: 1px solid var(--border) !important;
   border-radius: var(--radius-lg) !important;
-  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
 .clerk-header-title {
@@ -938,6 +971,7 @@ body {
 
 .clerk-btn-primary {
   background: var(--accent) !important;
+  color: #fff !important;
   border-radius: var(--radius-sm) !important;
   font-family: var(--font-body) !important;
   font-weight: 500 !important;
@@ -945,8 +979,8 @@ body {
 }
 
 .clerk-btn-primary:hover {
-  background: #9180fc !important;
-  box-shadow: 0 4px 16px rgba(124, 109, 250, 0.4) !important;
+  filter: brightness(1.1) !important;
+  box-shadow: 0 4px 16px var(--accent-glow) !important;
 }
 
 .clerk-footer-link {
@@ -954,7 +988,7 @@ body {
 }
 
 .clerk-input {
-  background: var(--bg-card) !important;
+  background: var(--bg-elevated) !important;
   border: 1px solid var(--border-mid) !important;
   border-radius: var(--radius-sm) !important;
   color: var(--text-primary) !important;
@@ -1017,4 +1051,31 @@ body {
 
 .clerk-user-trigger:hover {
   opacity: 0.85 !important;
+}
+
+/* ─── Theme Toggle ─── */
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-mid);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+  border-color: var(--accent-glow);
+  transform: rotate(15deg);
+}
+
+.theme-toggle svg {
+  transition: transform 0.3s ease;
 }
